@@ -2,7 +2,7 @@
 
 As part of the graduation project, it is necessary to implement a Blog engine based on the Spring Boot. 
 
-[link text itself]: https://diplom-blog-skillbox-j.herokuapp.com/
+[link text itself]:  https://diplom-blog-skillbox-j.herokuapp.com/
 
 
 ?useUnicode=true&characterEncoding=utf-8&reconnect=true
