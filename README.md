@@ -1,0 +1,2 @@
+# diplom_blog_java
+thesis_blog_spring_java
