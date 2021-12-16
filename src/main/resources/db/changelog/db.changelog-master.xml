@@ -1,0 +1,595 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fd (generated)" id="1630955163263-1">
+        <createTable tableName="captcha_codes">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="code" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secret_code" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-2">
+        <createTable tableName="global_settings">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="code" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-3">
+        <createTable tableName="hibernate_sequence">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-4">
+        <createTable tableName="post_comments">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="parent_id" type="INT"/>
+            <column name="post_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-5">
+        <createTable tableName="post_votes">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="post_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="TINYINT(3)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-6">
+        <createTable tableName="posts">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="is_active" type="TINYINT(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="NEW" name="moderation_status" type="VARCHAR(8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="moderator_id" type="INT"/>
+            <column name="text" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="view_count" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-7">
+        <createTable tableName="tag2post">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="post_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-8">
+        <createTable tableName="tags">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-9">
+        <createTable tableName="users">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="code" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_moderator" type="TINYINT(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="photo" type="TEXT"/>
+            <column name="reg_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-11">
+        <insert tableName="global_settings">
+            <column name="id" valueNumeric="1"/>
+            <column name="code" value="MULTIUSER_MODE"/>
+            <column name="name" value="Многопользовательский режим"/>
+            <column name="value" value="false"/>
+        </insert>
+        <insert tableName="global_settings">
+            <column name="id" valueNumeric="2"/>
+            <column name="code" value="POST_PREMODERATION"/>
+            <column name="name" value="Премодерация постов"/>
+            <column name="value" value="true"/>
+        </insert>
+        <insert tableName="global_settings">
+            <column name="id" valueNumeric="3"/>
+            <column name="code" value="STATISTICS_IS_PUBLIC"/>
+            <column name="name" value="Показывать всем статистику блога"/>
+            <column name="value" value="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-12">
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="20"/>
+        </insert>
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="20"/>
+        </insert>
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="20"/>
+        </insert>
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="20"/>
+        </insert>
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="20"/>
+        </insert>
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="20"/>
+        </insert>
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="20"/>
+        </insert>
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="20"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-13">
+        <insert tableName="post_comments">
+            <column name="id" valueNumeric="1"/>
+            <column name="parent_id"/>
+            <column name="post_id" valueNumeric="1"/>
+            <column name="text" value="Первый пост!"/>
+            <column name="time" valueDate="2021-08-12T20:37:55"/>
+            <column name="user_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="post_comments">
+            <column name="id" valueNumeric="2"/>
+            <column name="parent_id"/>
+            <column name="post_id" valueNumeric="7"/>
+            <column name="text" value="Здорово!"/>
+            <column name="time" valueDate="2021-08-12T21:37:55"/>
+            <column name="user_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="post_comments">
+            <column name="id" valueNumeric="3"/>
+            <column name="parent_id"/>
+            <column name="post_id" valueNumeric="8"/>
+            <column name="text" value="Да ладно!"/>
+            <column name="time" valueDate="2021-08-12T22:37:55"/>
+            <column name="user_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="post_comments">
+            <column name="id" valueNumeric="4"/>
+            <column name="parent_id"/>
+            <column name="post_id" valueNumeric="10"/>
+            <column name="text" value="Попробуем!"/>
+            <column name="time" valueDate="2021-08-12T23:37:55"/>
+            <column name="user_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="post_comments">
+            <column name="id" valueNumeric="5"/>
+            <column name="parent_id"/>
+            <column name="post_id" valueNumeric="2"/>
+            <column name="text" value="... Ну не знаю ..."/>
+            <column name="time" valueDate="2021-08-13T00:37:55"/>
+            <column name="user_id" valueNumeric="3"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-14">
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="1"/>
+            <column name="post_id" valueNumeric="1"/>
+            <column name="time" valueDate="2021-08-11T20:37:55"/>
+            <column name="user_id" valueNumeric="1"/>
+            <column name="value" valueNumeric="1"/>
+        </insert>
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="2"/>
+            <column name="post_id" valueNumeric="1"/>
+            <column name="time" valueDate="2021-08-11T21:37:55"/>
+            <column name="user_id" valueNumeric="2"/>
+            <column name="value" valueNumeric="1"/>
+        </insert>
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="3"/>
+            <column name="post_id" valueNumeric="1"/>
+            <column name="time" valueDate="2021-08-11T22:37:55"/>
+            <column name="user_id" valueNumeric="3"/>
+            <column name="value" valueNumeric="-1"/>
+        </insert>
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="4"/>
+            <column name="post_id" valueNumeric="1"/>
+            <column name="time" valueDate="2021-08-11T23:37:55"/>
+            <column name="user_id" valueNumeric="4"/>
+            <column name="value" valueNumeric="-1"/>
+        </insert>
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="5"/>
+            <column name="post_id" valueNumeric="9"/>
+            <column name="time" valueDate="2021-08-12T00:37:55"/>
+            <column name="user_id" valueNumeric="1"/>
+            <column name="value" valueNumeric="1"/>
+        </insert>
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="6"/>
+            <column name="post_id" valueNumeric="10"/>
+            <column name="time" valueDate="2021-08-12T01:37:55"/>
+            <column name="user_id" valueNumeric="4"/>
+            <column name="value" valueNumeric="1"/>
+        </insert>
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="7"/>
+            <column name="post_id" valueNumeric="11"/>
+            <column name="time" valueDate="2021-08-12T02:37:55"/>
+            <column name="user_id" valueNumeric="3"/>
+            <column name="value" valueNumeric="-1"/>
+        </insert>
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="8"/>
+            <column name="post_id" valueNumeric="7"/>
+            <column name="time" valueDate="2021-08-12T03:37:55"/>
+            <column name="user_id" valueNumeric="2"/>
+            <column name="value" valueNumeric="-1"/>
+        </insert>
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="9"/>
+            <column name="post_id" valueNumeric="8"/>
+            <column name="time" valueDate="2021-08-12T04:37:55"/>
+            <column name="user_id" valueNumeric="4"/>
+            <column name="value" valueNumeric="1"/>
+        </insert>
+        <insert tableName="post_votes">
+            <column name="id" valueNumeric="10"/>
+            <column name="post_id" valueNumeric="9"/>
+            <column name="time" valueDate="2021-08-12T05:37:55"/>
+            <column name="user_id" valueNumeric="1"/>
+            <column name="value" valueNumeric="-1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-15">
+        <insert tableName="posts">
+            <column name="id" valueNumeric="1"/>
+            <column name="is_active" valueNumeric="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value="Вспомните, что в последнее время вас больше всего впечатлило, заставило улыбнуться или даже рассмеяться. Это может быть фраза из кино, книги или вообще из рекламы. Процитируйте её подписчикам, не забыв указать источник."/>
+            <column name="time" valueDate="2021-08-09T21:37:55"/>
+            <column name="title" value="Цитаты"/>
+            <column name="user_id" valueNumeric="3"/>
+            <column name="view_count" valueNumeric="6"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="2"/>
+            <column name="is_active" valueNumeric="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value="Используйте метод сторителлинга и расскажите фолловерам забавную историю, которая произошла с вами, знакомыми или вы вообще её где-то прочитали. Главное — интересная подача и вовлекающая картинка. Как пример развлекательного поста в Инстаграм для блогера-мамы — история родов."/>
+            <column name="time" valueDate="2021-08-09T22:37:55"/>
+            <column name="title" value="Истории"/>
+            <column name="user_id" valueNumeric="1"/>
+            <column name="view_count" valueNumeric="5"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="3"/>
+            <column name="is_active" valueNumeric="0"/>
+            <column name="moderation_status" value="DECLINED"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value=" Сделайте одну из публикаций, чтобы рассмешить читателей. Это может быть смешная картинка, мем, анекдот. Главное условие — такой юмор должен быть корректным и никого не обижать."/>
+            <column name="time" valueDate="2021-08-09T23:37:55"/>
+            <column name="title" value="Юмор"/>
+            <column name="user_id" valueNumeric="2"/>
+            <column name="view_count" valueNumeric="0"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="4"/>
+            <column name="is_active" valueNumeric="0"/>
+            <column name="moderation_status" value="DECLINED"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value="Опубликуйте мотивационный пост, сопроводив его яркой, интересной картинкой. Например, это может быть рассказ или советы, как вы добились успеха в том или ином вопросе. Или соответствующая цитата."/>
+            <column name="time" valueDate="2021-08-10T00:37:55"/>
+            <column name="title" value="Мотивация"/>
+            <column name="user_id" valueNumeric="3"/>
+            <column name="view_count" valueNumeric="0"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="5"/>
+            <column name="is_active" valueNumeric="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value="Пользователи Инстаграм любят такой формат подачи юмора. Это отличный вариант, как можно оформить анекдот или другую забавную ситуацию. Комикс можно оформить самому или поручить иллюстратору."/>
+            <column name="time" valueDate="2021-08-10T01:37:55"/>
+            <column name="title" value="Комиксы"/>
+            <column name="user_id" valueNumeric="3"/>
+            <column name="view_count" valueNumeric="4"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="6"/>
+            <column name="is_active" valueNumeric="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value="Если есть возможность проведите интервью с известным человеком и опубликуйте то, о чём говорили. Или пообщайтесь со специалистом в интересной вам отрасли и расскажите о результатах."/>
+            <column name="time" valueDate="2021-08-10T02:37:55"/>
+            <column name="title" value="Интервью"/>
+            <column name="user_id" valueNumeric="1"/>
+            <column name="view_count" valueNumeric="2"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="7"/>
+            <column name="is_active" valueNumeric="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" valueNumeric="2"/>
+            <column name="text" value="Собирайте увлекательный материал и публикуйте интересное за определённое время: день, неделя, месяц. Например, подборка фильмов недели."/>
+            <column name="time" valueDate="2021-08-10T03:37:55"/>
+            <column name="title" value="Интересное за неделю"/>
+            <column name="user_id" valueNumeric="4"/>
+            <column name="view_count" valueNumeric="8"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="8"/>
+            <column name="is_active" valueNumeric="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" valueNumeric="2"/>
+            <column name="text" value="Напишите опровержения или иллюзии, касающиеся вашего товара. Подумайте, чего могут опасаться покупатели при заказе услуги и развейте их страхи. Подача может быть разная — фото, комикс или видео. Например, студия красоты и косметологии предлагает услуги массажа и развеивает мифы о целлюлите."/>
+            <column name="time" valueDate="2021-08-10T04:37:55"/>
+            <column name="title" value="Мифы"/>
+            <column name="user_id" valueNumeric="3"/>
+            <column name="view_count" valueNumeric="3"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="9"/>
+            <column name="is_active" valueNumeric="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" valueNumeric="2"/>
+            <column name="text" value="Информируйте своих подписчиков о предстоящих событиях в вашей компании (юбилеи, знаменательные даты), розыгрышах."/>
+            <column name="time" valueDate="2021-08-10T05:37:55"/>
+            <column name="title" value="Анонсы"/>
+            <column name="user_id" valueNumeric="1"/>
+            <column name="view_count" valueNumeric="4"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="10"/>
+            <column name="is_active" valueNumeric="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value="Показать закулисную жизнь вашей компании подписчикам. Людям интересны такие подробности. Они повышают доверие к бренду. Например, магазин одежды публикует видео со съёмки своей коллекции."/>
+            <column name="time" valueDate="2021-08-10T06:37:55"/>
+            <column name="title" value="Закулисье"/>
+            <column name="user_id" valueNumeric="2"/>
+            <column name="view_count" valueNumeric="8"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="11"/>
+            <column name="is_active" valueNumeric="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value="Они подходят как для личного блога, так и для корпоративного. Для коммерческого аккаунта можно публиковать высказывания, касающиеся вашего бренда. Например, книжный магазин публикует интересные цитаты из книг."/>
+            <column name="time" valueDate="2021-08-10T07:37:55"/>
+            <column name="title" value="Цитаты"/>
+            <column name="user_id" valueNumeric="3"/>
+            <column name="view_count" valueNumeric="2"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="12"/>
+            <column name="is_active" valueNumeric="0"/>
+            <column name="moderation_status" value="NEW"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value="    Организуйте свой или примите участие в чужом флешмобе. Напишите об этом интересный пост. Это может быть публикация снимков с заданным сюжетом или акция в городе. Идеальным вариантом будет обыграть товар в ходе акции. Например, для ресторанного бизнеса можно рассказать о блюде и запустить флешмоб — попросить подписчиков тоже опубликовать фото этого блюда с нужными тегами."/>
+            <column name="time" valueDate="2021-08-10T09:37:55"/>
+            <column name="title" value="Флешмобы"/>
+            <column name="user_id" valueNumeric="4"/>
+            <column name="view_count" valueNumeric="0"/>
+        </insert>
+        <insert tableName="posts">
+            <column name="id" valueNumeric="13"/>
+            <column name="is_active" valueNumeric="0"/>
+            <column name="moderation_status" value="NEW"/>
+            <column name="moderator_id" valueNumeric="4"/>
+            <column name="text" value="Спросите подписчиков, что они думают по поводу одной из ваших услуг."/>
+            <column name="time" valueDate="2021-08-10T10:37:55"/>
+            <column name="title" value="Опрос"/>
+            <column name="user_id" valueNumeric="1"/>
+            <column name="view_count" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-16">
+        <insert tableName="tag2post">
+            <column name="id" valueNumeric="1"/>
+            <column name="post_id" valueNumeric="1"/>
+            <column name="tag_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="tag2post">
+            <column name="id" valueNumeric="2"/>
+            <column name="post_id" valueNumeric="7"/>
+            <column name="tag_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="tag2post">
+            <column name="id" valueNumeric="3"/>
+            <column name="post_id" valueNumeric="8"/>
+            <column name="tag_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="tag2post">
+            <column name="id" valueNumeric="4"/>
+            <column name="post_id" valueNumeric="9"/>
+            <column name="tag_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="tag2post">
+            <column name="id" valueNumeric="5"/>
+            <column name="post_id" valueNumeric="10"/>
+            <column name="tag_id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-17">
+        <insert tableName="tags">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="новое"/>
+        </insert>
+        <insert tableName="tags">
+            <column name="id" valueNumeric="2"/>
+            <column name="name" value="интересное"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-18">
+        <insert tableName="users">
+            <column name="id" valueNumeric="1"/>
+            <column name="code"/>
+            <column name="email" value="ivanov@gmail.com"/>
+            <column name="is_moderator" valueNumeric="1"/>
+            <column name="name" value="ivanov"/>
+            <column name="password" value="$2a$12$8JKDUJJWZYuBYpbvuHcTkOnmvq9iSegS5yVxbyhSnov2a164L7mAi"/>
+            <column name="photo"/>
+            <column name="reg_time" valueDate="2021-08-09T20:37:55"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" valueNumeric="2"/>
+            <column name="code"/>
+            <column name="email" value="petrov@gmail.com"/>
+            <column name="is_moderator" valueNumeric="1"/>
+            <column name="name" value="petrov"/>
+            <column name="password" value="$2a$12$8JKDUJJWZYuBYpbvuHcTkOnmvq9iSegS5yVxbyhSnov2a164L7mAi"/>
+            <column name="photo"/>
+            <column name="reg_time" valueDate="2021-08-09T20:38:55"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" valueNumeric="3"/>
+            <column name="code"/>
+            <column name="email" value="sidorov@gmail.com"/>
+            <column name="is_moderator" valueNumeric="1"/>
+            <column name="name" value="sidorov"/>
+            <column name="password" value="$2a$12$8JKDUJJWZYuBYpbvuHcTkOnmvq9iSegS5yVxbyhSnov2a164L7mAi"/>
+            <column name="photo"/>
+            <column name="reg_time" valueDate="2021-08-09T20:39:55"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" valueNumeric="4"/>
+            <column name="code"/>
+            <column name="email" value="maleykovich@gmail.com"/>
+            <column name="is_moderator" valueNumeric="1"/>
+            <column name="name" value="maleykovich"/>
+            <column name="password" value="$2a$12$8JKDUJJWZYuBYpbvuHcTkOnmvq9iSegS5yVxbyhSnov2a164L7mAi"/>
+            <column name="photo"/>
+            <column name="reg_time" valueDate="2021-08-09T20:40:55"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-19">
+        <createIndex indexName="FK5lidm6cqbc7u4xhqpxm898qme" tableName="posts">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-20">
+        <createIndex indexName="FK9jh5u17tmu1g7xnlxa77ilo3u" tableName="post_votes">
+            <column name="post_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-21">
+        <createIndex indexName="FK9q09ho9p8fmo6rcysnci8rocc" tableName="post_votes">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-22">
+        <createIndex indexName="FKaawaqxjs3br8dw5v90w7uu514" tableName="post_comments">
+            <column name="post_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-23">
+        <createIndex indexName="FKjou6suf2w810t2u3l96uasw3r" tableName="tag2post">
+            <column name="tag_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-24">
+        <createIndex indexName="FKpjoedhh4h917xf25el3odq20i" tableName="tag2post">
+            <column name="post_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-25">
+        <createIndex indexName="FKsnxoecngu89u3fh4wdrgf0f2g" tableName="post_comments">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-26">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="posts" constraintName="FK5lidm6cqbc7u4xhqpxm898qme" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-27">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_votes" constraintName="FK9jh5u17tmu1g7xnlxa77ilo3u" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posts" validate="true"/>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-28">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="post_votes" constraintName="FK9q09ho9p8fmo6rcysnci8rocc" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-29">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="post_comments" constraintName="FKaawaqxjs3br8dw5v90w7uu514" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posts" validate="true"/>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-30">
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="tag2post" constraintName="FKjou6suf2w810t2u3l96uasw3r" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tags" validate="true"/>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-31">
+        <addForeignKeyConstraint baseColumnNames="post_id" baseTableName="tag2post" constraintName="FKpjoedhh4h917xf25el3odq20i" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posts" validate="true"/>
+    </changeSet>
+    <changeSet author="fd (generated)" id="1630955163263-32">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="post_comments" constraintName="FKsnxoecngu89u3fh4wdrgf0f2g" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
