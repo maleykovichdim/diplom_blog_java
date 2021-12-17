@@ -27,7 +27,7 @@ import java.util.Properties;
 @Configurable
 public class CommonService {
 
-    private static final String URL_CHANGE_PASSWORD = "http://localhost:8080/login/change-password/";
+    private static final String URL_CHANGE_PASSWORD = "https://diplom-blog-skillbox-j.herokuapp.com/login/change-password/";
     private static final String AUTH_EMAIL = "dmaleyk@gmail.com";
     private static final int CAPTCHA_NUM_SYMBOLS = 5;
     private static final int CAPTCHA_SECRET_CODE_NUM_SYMBOLS = 20;
@@ -64,7 +64,7 @@ public class CommonService {
                 new javax.mail.Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(AUTH_EMAIL, authPassword);
+                        return new PasswordAuthentication(AUTH_EMAIL, "nuauocwnfrsrcwto");
                     }
                 });
 
