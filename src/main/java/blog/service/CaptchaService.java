@@ -12,6 +12,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.UUID;
@@ -28,14 +32,10 @@ public class CaptchaService {
     public CaptchaResponse createAndSaveCaptcha() {
         LOGGER.info("Start creating captcha");
         String secretCode = UUID.randomUUID().toString();
-        //System.out.println(secretCode);
         Pair<String, byte[]> captchaToImage = generateCaptcha();
         String captchaText = captchaToImage.getFirst();
         byte[] imageInBytes = captchaToImage.getSecond();
         String encodedImage = encodeStringIntoBase64(imageInBytes);
-        //System.out.println("encodedImage: " + encodedImage);
-        //System.out.println("secretCode: " + secretCode);
-
         CaptchaCode captchaCode = new CaptchaCode();
         captchaCode.setCode(captchaText);
         captchaCode.setSecretCode(secretCode);
@@ -46,17 +46,31 @@ public class CaptchaService {
         captchaResponse.setSecret(secretCode);
         captchaResponse.setImage("data:image/png;base64, " + encodedImage);
 
-        //System.out.println("captha generated: "+captchaResponse.toString());
         return captchaResponse;
+    }
+
+    private static BufferedImage resize(BufferedImage img, int newW, int newH) {
+        int w = img.getWidth();
+        int h = img.getHeight();
+        BufferedImage dimg = new BufferedImage(newW, newH, img.getType());
+        Graphics2D g = dimg.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(img, 0, 0, newW, newH, 0, 0, w, h, null);
+        g.dispose();
+        return dimg;
     }
 
     private Pair<String, byte[]> generateCaptcha() {
         Cage cage = new GCage();
         String captchaText = cage.getTokenGenerator().next();
-        //System.out.println("next: " + captchaText);
         byte[] imageInBytes = new byte[0];
         try {
-            imageInBytes = cage.draw(captchaText);
+            BufferedImage image = cage.drawImage(captchaText);
+            BufferedImage newImage = resize(image, 100, 35);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(newImage, "png", baos);
+            imageInBytes = baos.toByteArray();
         } catch (Exception e) {
             e.printStackTrace();
         }

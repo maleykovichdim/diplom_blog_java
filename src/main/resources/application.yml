@@ -18,5 +18,21 @@ blog.email: mail@mail.ru
 blog.copyright: Дмитрий Сергеев
 blog.copyrightFrom: 2005
 
+blog_engine:
+  additional:
+    announceMaxLength: 150
+    uploadedMaxFileWeight: 5242880
+    commentMinLength: 3
+    passwordMinLength: 6
+    profilePhotoWidth: 36
+    profilePhotoHeight: 36
+    postTitleMinLength: 3
+    postTextMinLength: 50
+    websiteHost: diplom-blog-skillbox-j.herokuapp.com
+  cloudinary:
+    cloudName: dov4fhu49
+    apiKey: ${CLOUDINARY_API_KEY}
+    apiSecret: ${CLOUDINARY_API_SECRET}
+
 
 

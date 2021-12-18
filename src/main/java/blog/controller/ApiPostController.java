@@ -5,6 +5,7 @@ import blog.api.request.ModerateRequest;
 import blog.api.request.PostRequest;
 import blog.api.response.ResultResponse;
 import blog.api.response.StatisticResponse;
+import blog.api.response.post.PostByIdResponse;
 import blog.api.response.post.PostResponse;
 import blog.model.User;
 import blog.model.repository.UserRepository;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -156,6 +158,17 @@ public class ApiPostController {
         }
         catch(Exception exception){
             return ResponseEntity.ok(new ResultResponse(false));
+        }
+    }
+
+    @GetMapping(value = "/post/{id}")
+    public ResponseEntity getPostById(@PathVariable final int id, final Principal principal) {
+
+        Optional<PostByIdResponse> optionalPostByIdResponse = postService.getPostById(id, principal);
+        if (optionalPostByIdResponse.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } else {
+            return new ResponseEntity(optionalPostByIdResponse.get(), HttpStatus.OK);
         }
     }
 }

@@ -12,9 +12,14 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -64,7 +69,7 @@ public class CommonService {
                 new javax.mail.Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(AUTH_EMAIL, authPassword);
+                        return new PasswordAuthentication(AUTH_EMAIL, "nuauocwnfrsrcwto");
                     }
                 });
 
@@ -84,20 +89,6 @@ public class CommonService {
             return false;
         }
         return true;
-    }
-
-    public CaptchaResponse getCaptcha(){
-
-        captchaRepository.cleanExpired((LocalDateTime.now(ZoneOffset.UTC)).minusHours(1));
-        final String displayedCode = RandomStringUtils.randomAlphanumeric(CAPTCHA_NUM_SYMBOLS);
-        final String secretCode = RandomStringUtils.randomAlphanumeric(CAPTCHA_SECRET_CODE_NUM_SYMBOLS);
-        String encodedImage =  "data:image//png;base64," + Base64.getEncoder().encodeToString(cage.draw(displayedCode));
-        CaptchaCode captchaCode = new CaptchaCode();
-        captchaCode.setCode(displayedCode);
-        captchaCode.setSecretCode(secretCode);
-        captchaCode.setTime(LocalDateTime.now(ZoneOffset.UTC));
-        captchaRepository.save(captchaCode);
-        return  new CaptchaResponse(secretCode, encodedImage);
     }
 
 }

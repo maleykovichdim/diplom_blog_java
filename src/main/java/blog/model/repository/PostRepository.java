@@ -2,11 +2,14 @@ package blog.model.repository;
 
 import blog.model.enums.ModerationStatus;
 import blog.model.Post;
+import blog.model.other.PostsCountPerDate;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -233,6 +236,24 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Integer
                                                  Pageable pageable
 
     );
+
+    @Query("SELECT new blog.model.other.PostsCountPerDate(DATE_FORMAT(p.time,'%Y-%m-%d') AS postsDate" +
+            ", COUNT(p.id) AS postsCount) FROM Post p" +
+            " WHERE year(p.time) = :year" +
+            " GROUP BY DATE_FORMAT(p.time,'%Y-%m-%d')")
+    List<PostsCountPerDate> findPostsCountPerDateByYear(int year);
+
+    @Query("SELECT DISTINCT year(p.time) FROM Post p")
+    List<Integer> findDistinctYears();
+
+    Post findPostById(@Param("id") int id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE posts SET posts.view_count = posts.view_count + 1 WHERE posts.id = :id",
+            nativeQuery = true)
+    void updateViewCount(@Param("id") int id);
+
 
 }
 

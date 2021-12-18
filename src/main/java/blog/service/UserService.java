@@ -3,6 +3,7 @@ package blog.service;
 import blog.api.request.AuthPasswordRequest;
 import blog.api.response.Errors;
 import blog.api.response.ResultResponse;
+import blog.controller.exceptions.BadRequestException;
 import blog.model.CaptchaCode;
 import blog.model.User;
 import blog.model.repository.CaptchaRepository;
@@ -10,6 +11,7 @@ import blog.model.repository.UserRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,15 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 import java.io.File;
+import java.util.UUID;
 
 
 @Service
@@ -30,15 +37,25 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CaptchaRepository captchaRepository;
+    private final CloudinaryService cloudinaryService;
+
+
 
     private static final String FILE_PATH = "photos\\";
     private static final int PHOTO_SIZE_PX = 36;
 
+    private static final String rootFolder = "/upload";
+    @Value("${blog_engine.additional.uploadedMaxFileWeight}")
+    private int FILE_MAX_WEIGHT;
+    @Value("${blog_engine.additional.passwordMinLength}")
+    private int PASSWORD_MIN_LENGTH;
+
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CaptchaRepository captchaRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CaptchaRepository captchaRepository, CloudinaryService cloudinaryService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.captchaRepository = captchaRepository;
+        this.cloudinaryService = cloudinaryService;
         File dir = new File(System.getProperty("user.dir")+"\\"+FILE_PATH);
         if (!dir.exists()){
             dir.mkdir();
@@ -91,6 +108,56 @@ public class UserService {
         return  resultResponse;
     }
 
+//    private String saveImage(ImageData image) {
+//        return saveImage(image.getImage(), false);
+//    }
+
+    private Path generateFilePath() {
+        String[] pathParts = UUID.randomUUID().toString().split("-");
+        Path path = Paths.get(rootFolder);
+        for (int i = 0; i < 3; i++) {
+            path = path.resolve(pathParts[i]);
+        }
+        return path;
+    }
+
+    private String saveImage(MultipartFile image, boolean cut) {
+        String savedImageUrl;
+        String originalFileName = image.getOriginalFilename();
+        String extension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
+        if (!extension.equals("jpg") && !extension.equals("png")) {
+            System.out.println("Got error with image {}. Image extension should be jpg or png"+ originalFileName);
+            BadRequestException exception = new BadRequestException("Wrong image extension");
+            exception.addErrorDescription("photo", "Неправильное разрешение файла. Ожидается jpg или png.");
+            throw exception;
+
+        }
+        if (image.getSize() > FILE_MAX_WEIGHT) {
+            System.out.println("Got error with image {}. Weight is more than expected."+originalFileName);
+            BadRequestException exception = new BadRequestException("Wrong image weight");
+            exception.addErrorDescription("photo", "Размер файла превышает допустимый размер 5Мб");
+            throw exception;
+        }
+
+        Path uniquePath = generateFilePath();
+
+        Path currentPath = FileSystems.getDefault().getPath("").toAbsolutePath();
+        Path fullPath = Path.of(currentPath.toString(), uniquePath.toString(), originalFileName);
+        savedImageUrl = fullPath.toString();
+        System.out.println("Save image to path: {}"+ fullPath);
+        fullPath.getParent().toFile().mkdirs();
+        try {
+            image.transferTo(new File(fullPath.toString()));
+            savedImageUrl = cloudinaryService.uploadImage(fullPath.toString(), uniquePath.toString().replace("\\","/"), cut);
+            Files.delete(fullPath); //после загрузки файла в облако, освобождаем место на диске
+        } catch (IOException e) {
+            System.out.println("Got error while saving image {} to path {}"+ originalFileName+" "+ fullPath.toString()+" "+ e);
+        }
+        System.out.println("Image has been saved into cloudinary, url:\n" + savedImageUrl);
+
+        return savedImageUrl;
+    }
+
     public ResponseEntity<ResultResponse> changeProfile(
             MultipartFile photo,
             String name,
@@ -112,13 +179,14 @@ public class UserService {
         }
 
         if (photo != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String newName = String.format("photo_profile_%s.%s.%s.png", sdf.format(new Date()), RandomStringUtils.randomAlphanumeric(5), photo.getOriginalFilename());
-            String filePath = System.getProperty("user.dir")+"\\"+FILE_PATH + newName;
-            BufferedImage inputImage = ImageIO.read(photo.getInputStream());
-            BufferedImage newImage = photoResizeAndCrop(inputImage);
-            ImageIO.write(newImage, "png", new File(filePath));
-            user.setPhoto(FILE_PATH + newName);
+            String imagePath = saveImage(photo, true);
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//            String newName = String.format("photo_profile_%s.%s.%s.png", sdf.format(new Date()), RandomStringUtils.randomAlphanumeric(5), photo.getOriginalFilename());
+//            String filePath = System.getProperty("user.dir")+"\\"+FILE_PATH + newName;
+//            BufferedImage inputImage = ImageIO.read(photo.getInputStream());
+//            BufferedImage newImage = photoResizeAndCrop(inputImage);
+//            ImageIO.write(newImage, "png", new File(filePath));
+            user.setPhoto(imagePath);
         }
 
         userRepository.save(user);

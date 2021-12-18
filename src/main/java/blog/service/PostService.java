@@ -4,19 +4,17 @@ package blog.service;
 import blog.api.request.LikeRequest;
 import blog.api.request.ModerateRequest;
 import blog.api.request.PostRequest;
+import blog.api.response.CalendarResponse;
 import blog.api.response.Errors;
 import blog.api.response.ResultResponse;
 import blog.api.response.StatisticResponse;
-import blog.api.response.post.PostResponse;
-import blog.api.response.post.PostResponseBody;
+import blog.api.response.post.*;
 import blog.api.response.user.UserForPostIdAndName;
 import blog.model.*;
 import blog.model.enums.ModerationStatus;
-import blog.model.repository.PostRepository;
+import blog.model.other.PostsCountPerDate;
+import blog.model.repository.*;
 
-import blog.model.repository.Tag2PostRepository;
-import blog.model.repository.TagRepository;
-import blog.model.repository.VoteRepository;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -26,12 +24,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -52,13 +50,15 @@ public class PostService {
     private final TagRepository tagRepository;
     private final Tag2PostRepository tag2PostRepository ;
     private final VoteRepository voteRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public PostService(PostRepository postRepository, TagRepository tagRepository, Tag2PostRepository tag2PostRepository, VoteRepository voteRepository, SettingsService settingsService) {
+    public PostService(PostRepository postRepository, TagRepository tagRepository, Tag2PostRepository tag2PostRepository, VoteRepository voteRepository, SettingsService settingsService, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.tagRepository = tagRepository;
         this.tag2PostRepository = tag2PostRepository;
         this.voteRepository = voteRepository;
+        this.userRepository = userRepository;
     }
 
     private  List<PostResponseBody> convertToResponseManyPosts(List<Post> postList){
@@ -70,7 +70,7 @@ public class PostService {
             a.setTitle(post.getTitle());
             a.setAnnounce(Jsoup.parse(post.getText()).text());
             a.setLikeCount(post.getPostVotes().stream().filter(e -> e.getValue()>0).mapToInt(PostVote::getValue).sum());
-            a.setDislikeCount(post.getPostVotes().stream().filter(e -> e.getValue()<0).mapToInt(PostVote::getValue).sum());
+            a.setDislikeCount(Math.abs(post.getPostVotes().stream().filter(e -> e.getValue()<0).mapToInt(PostVote::getValue).sum()));
             a.setCommentCount(post.getPostComments().size());
             a.setViewCount(post.getViewCount());
             a.setUser(new UserForPostIdAndName(post.getUser().getId(), post.getUser().getName()));
@@ -278,6 +278,7 @@ public class PostService {
         if (needToDoExtraOperation) {
             post.setUserId(userId);
             post.setModerationStatus(ModerationStatus.NEW);
+            post.setIsActive((byte)1);//Todo check it
         }
         return post;
     }
@@ -447,5 +448,91 @@ public class PostService {
         postRepository.save(currentPost);
         resultResponse.setResult(true);
         return resultResponse;
+    }
+
+    public CalendarResponse selectPostsCountsByYear(int year) {
+        List<PostsCountPerDate> postsCountPerDates = postRepository.findPostsCountPerDateByYear(year);
+        List<Integer> distinctByTime = postRepository.findDistinctYears();
+        return mapToPostsCountsPerYear(distinctByTime, postsCountPerDates);
+    }
+
+    private CalendarResponse mapToPostsCountsPerYear(List<Integer> years, List<PostsCountPerDate> postsCountPerDates) {
+        Map<String, Long> posts = new HashMap<>();
+        for (PostsCountPerDate item : postsCountPerDates) {
+            posts.put(item.getPostsDate(), item.getPostsCount());
+        }
+        CalendarResponse calendarResponse = new CalendarResponse();
+        calendarResponse.setYears(years);
+        calendarResponse.setPosts(posts);
+        return calendarResponse;
+    }
+
+    public Optional<PostByIdResponse> getPostById(final int id, Principal principal) {
+        Post post = postRepository.findPostById(id);
+
+        if (post == null) {
+            return Optional.empty();
+        }
+
+        if (principal != null) {
+            User currentUser = userRepository.findByEmail(principal.getName()).get();
+            if (currentUser.getIsModerator() == 1 || currentUser.getId() == post.getUser().getId()) {
+                return Optional.of(postEntityToResponseById(post, id));
+            }
+        }
+
+        postRepository.updateViewCount(id);
+        return Optional.of(postEntityToResponseById(post, id));
+    }
+
+    private PostByIdResponse postEntityToResponseById(final Post post, final int id) {
+        PostByIdResponse postByIdResponse = new PostByIdResponse();
+
+        postByIdResponse.setId(id);
+        postByIdResponse.setTimestamp(post.getTime().toEpochSecond(ZoneOffset.of("+03:00")));
+        postByIdResponse.setActive(post.getIsActive() != 0);
+
+        User user = post.getUser();
+
+        postByIdResponse.setUserDto(new PostsResponseUserDto(user.getId(), user.getName()));
+        postByIdResponse.setTitle(post.getTitle());
+        postByIdResponse.setText(post.getText());
+
+        int likes = 0;
+        int dislikes = 0;
+        for (PostVote vote : post.getPostVotes()) {
+            if ((vote.getValue() == 1)) {
+                likes++;
+            } else {
+                dislikes++;
+            }
+        }
+
+        postByIdResponse.setLikeCount(likes);
+        postByIdResponse.setDislikeCount(dislikes);
+
+        postByIdResponse.setViewCount(post.getViewCount());
+
+        List<CommentsResponseDto> commentsResponseDtoList = new ArrayList<>();
+
+        for (PostComment comment : post.getPostComments()) {
+            User commentUser = comment.getUser();
+            commentsResponseDtoList.add(new CommentsResponseDto(comment.getId(),
+                    comment.getTime().toEpochSecond(ZoneOffset.of("+03:00")),
+                    comment.getText(),
+                    new CommentsResponseUserDto(commentUser.getId(), commentUser.getName(), commentUser.getPhoto())));
+        }
+
+        postByIdResponse.setComments(commentsResponseDtoList);
+
+        List<String> tagResponse = new ArrayList<>();
+
+        for (Tag tag : post.getTags()) {
+            tagResponse.add(tag.getName());
+        }
+
+        postByIdResponse.setTags(tagResponse);
+
+        return postByIdResponse;
     }
 }

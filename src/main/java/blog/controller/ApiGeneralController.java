@@ -1,6 +1,7 @@
 package blog.controller;
 
 import blog.api.request.PostCommentRequest;
+import blog.api.response.CalendarResponse;
 import blog.api.response.InitResponse;
 import blog.api.response.ResultResponse;
 import blog.api.response.SettingResponseRequest;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.time.LocalDate;
 
 
 @RestController
@@ -28,15 +30,17 @@ public class ApiGeneralController {
     private final InitResponse initResponse;
     private final UserService userService;
     private final CommonService commonService;
+    private final PostService postService;
 
     @Autowired
-    public ApiGeneralController(SettingsService settingsService, TagService tagService, CommentService commentService, InitResponse initResponse, UserRepository userRepository, UserService userService, CommonService commonService) {
+    public ApiGeneralController(SettingsService settingsService, TagService tagService, CommentService commentService, InitResponse initResponse, UserRepository userRepository, UserService userService, CommonService commonService, PostService postService) {
         this.settingsService = settingsService;
         this.tagService = tagService;
         this.commentService = commentService;
         this.initResponse = initResponse;
         this.userService = userService;
         this.commonService = commonService;
+        this.postService = postService;
     }
 
     @GetMapping("/settings")
@@ -102,4 +106,13 @@ public class ApiGeneralController {
         resultResponse.setResult(true);
         return ResponseEntity.ok(resultResponse);
     }
+
+    @GetMapping("/calendar")
+    public CalendarResponse getCalendar(@RequestParam(defaultValue = "-1") int year) {
+        if (year < 0) {
+            year = LocalDate.now().getYear();
+        }
+        return postService.selectPostsCountsByYear(year);
+    }
+
 }
