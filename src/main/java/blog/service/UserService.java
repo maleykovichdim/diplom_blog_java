@@ -293,6 +293,7 @@ public class UserService {
 
     private void addNewUser(final RegisterUserRequest registerUserRequest) {
         User user = new User();
+        user.setIsModerator((byte)0);
         user.setEmail(registerUserRequest.getEmail());
         user.setName(registerUserRequest.getName());
         user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));

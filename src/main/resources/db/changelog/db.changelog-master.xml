@@ -436,7 +436,7 @@
         </insert>
         <insert tableName="posts">
             <column name="id" valueNumeric="12"/>
-            <column name="is_active" valueNumeric="0"/>
+            <column name="is_active" valueNumeric="1"/>
             <column name="moderation_status" value="NEW"/>
             <column name="moderator_id" valueNumeric="4"/>
             <column name="text" value="    Организуйте свой или примите участие в чужом флешмобе. Напишите об этом интересный пост. Это может быть публикация снимков с заданным сюжетом или акция в городе. Идеальным вариантом будет обыграть товар в ходе акции. Например, для ресторанного бизнеса можно рассказать о блюде и запустить флешмоб — попросить подписчиков тоже опубликовать фото этого блюда с нужными тегами."/>
@@ -447,7 +447,7 @@
         </insert>
         <insert tableName="posts">
             <column name="id" valueNumeric="13"/>
-            <column name="is_active" valueNumeric="0"/>
+            <column name="is_active" valueNumeric="1"/>
             <column name="moderation_status" value="NEW"/>
             <column name="moderator_id" valueNumeric="4"/>
             <column name="text" value="Спросите подписчиков, что они думают по поводу одной из ваших услуг."/>

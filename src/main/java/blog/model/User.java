@@ -2,6 +2,7 @@ package blog.model;
 
 import blog.model.enums.Role;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ public class User {
 
 
     @Column(name = "is_moderator", nullable = false)
+    @ColumnDefault("0")
     private Byte isModerator;
 
 
