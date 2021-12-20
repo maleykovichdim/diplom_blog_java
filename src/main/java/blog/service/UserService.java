@@ -1,6 +1,8 @@
 package blog.service;
 
 import blog.api.request.AuthPasswordRequest;
+import blog.api.request.RegisterUserRequest;
+import blog.api.response.AuthRegisterResponse;
 import blog.api.response.Errors;
 import blog.api.response.ResultResponse;
 import blog.controller.exceptions.BadRequestException;
@@ -8,7 +10,6 @@ import blog.model.CaptchaCode;
 import blog.model.User;
 import blog.model.repository.CaptchaRepository;
 import blog.model.repository.UserRepository;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,15 +18,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Optional;
 import java.io.File;
 import java.util.UUID;
@@ -38,11 +39,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final CaptchaRepository captchaRepository;
     private final CloudinaryService cloudinaryService;
+    private final CaptchaService captchaService;
 
 
 
     private static final String FILE_PATH = "photos\\";
     private static final int PHOTO_SIZE_PX = 36;
+    static final int PASSWORD_LENGTH_THRESHOLD = 6;
 
     private static final String rootFolder = "/upload";
     @Value("${blog_engine.additional.uploadedMaxFileWeight}")
@@ -51,11 +54,12 @@ public class UserService {
     private int PASSWORD_MIN_LENGTH;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CaptchaRepository captchaRepository, CloudinaryService cloudinaryService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CaptchaRepository captchaRepository, CloudinaryService cloudinaryService, CaptchaService captchaService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.captchaRepository = captchaRepository;
         this.cloudinaryService = cloudinaryService;
+        this.captchaService = captchaService;
         File dir = new File(System.getProperty("user.dir")+"\\"+FILE_PATH);
         if (!dir.exists()){
             dir.mkdir();
@@ -249,4 +253,51 @@ public class UserService {
         userRepository.save(currentUser);
         return new ResultResponse(true);
     }
+
+    public AuthRegisterResponse getAuthRegisterResponse(final RegisterUserRequest registerUserRequest) {
+        String name = registerUserRequest.getName().trim().replaceAll("\\s+", " ");
+        HashMap<String, String> errors = new HashMap<>();
+        boolean result = true;
+        if (userRepository.findByEmail(registerUserRequest.getEmail()).isPresent()) {
+            errors.put("email", "Этот e-mail уже зарегистрирован");
+            result = false;
+        }
+
+        if (!checkName(name)) {
+            errors.put("name", "Имя указано не верно");
+            result = false;
+        }
+
+        if (registerUserRequest.getPassword().length() < PASSWORD_LENGTH_THRESHOLD) {
+            errors.put("password", "Пароль короче 6-ти символов");
+            result = false;
+        }
+
+
+        if (captchaRepository.getCaptchaCode(registerUserRequest.getCaptcha(), registerUserRequest.getCaptchaSecret()) == null) {
+            errors.put("captcha", "Код с картинки введён неверно");
+            result = false;
+        }
+
+        if (result) {
+            addNewUser(registerUserRequest);
+            return new AuthRegisterResponse(result);
+        } else {
+            return new AuthRegisterResponse(result, errors);
+        }
+    }
+
+    boolean checkName(final String name) {
+        return name.replaceAll("[a-zа-яёA-ZА-ЯЁ\\s]+", "").equals("");
+    }
+
+    private void addNewUser(final RegisterUserRequest registerUserRequest) {
+        User user = new User();
+        user.setEmail(registerUserRequest.getEmail());
+        user.setName(registerUserRequest.getName());
+        user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
+        user.setRegTime(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
 }

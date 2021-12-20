@@ -4,6 +4,8 @@ import blog.api.request.AuthPasswordRequest;
 import blog.api.request.EmailRequest;
 import blog.api.request.LoginRequest;
 
+import blog.api.request.RegisterUserRequest;
+import blog.api.response.AuthRegisterResponse;
 import blog.api.response.auth.CaptchaResponse;
 import blog.api.response.auth.LoginResponse;
 import blog.api.response.ResultResponse;
@@ -16,6 +18,7 @@ import blog.service.CommonService;
 import blog.service.PostService;
 import blog.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -158,6 +162,12 @@ public class ApiAuthController {
     public ResponseEntity<CaptchaResponse> getCaptcha(){
         captchaService.deleteExpiredCaptcha();
         return ResponseEntity.ok(captchaService.createAndSaveCaptcha());
+    }
+
+
+    @PostMapping("/register")
+    public AuthRegisterResponse getAuthRegisterResponse(@RequestBody final RegisterUserRequest registerUserRequest) {
+        return userService.getAuthRegisterResponse(registerUserRequest);
     }
 
 }

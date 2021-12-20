@@ -23,6 +23,11 @@ public interface CaptchaRepository extends CrudRepository<CaptchaCode, Integer> 
     void deleteByTimeBefore(LocalDateTime time);
     Optional<CaptchaCode> findCaptchaCodeBySecretCode(String secretCode);
 
+    @Query(value = "SELECT * FROM captcha_codes " +
+            "WHERE captcha_codes.code = :code " +
+            "AND captcha_codes.secret_code = :secret_code", nativeQuery = true)
+    CaptchaCode getCaptchaCode(@Param("code") String code, @Param("secret_code") String secretCode);
+
 }
 
 
