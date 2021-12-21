@@ -1,6 +1,7 @@
 package blog.controller;
 
 import blog.api.request.PostCommentRequest;
+import blog.api.request.ProfileData;
 import blog.api.response.CalendarResponse;
 import blog.api.response.InitResponse;
 import blog.api.response.ResultResponse;
@@ -10,6 +11,7 @@ import blog.model.User;
 import blog.model.repository.UserRepository;
 import blog.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -72,23 +74,52 @@ public class ApiGeneralController {
         return commentService.putComment(inputPostComment, currentUserId);
     }
 
-    @PostMapping("/profile/my")
+    @PostMapping(value="/profile/my", produces = {MediaType.APPLICATION_JSON_VALUE},
+            consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ResultResponse> changeProfile(
-            @RequestParam(name="photo", required = false) MultipartFile photo,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String password,
-            @RequestParam(required = false) Byte removePhoto,
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("removePhoto") boolean removePhoto,
+            @RequestParam(value = "password", defaultValue = "") String password,
+            @RequestParam("photo") MultipartFile photo,
             Principal principal) throws IOException {
 
         User user = commonService.getCurrentUser(principal);
         ResultResponse resultResponse = userService.validateChangeProfile(
-                                            photo, name, email, password, removePhoto, user);
+                photo, name, email, password,
+                removePhoto?(byte)1:(byte)0, user);
         if (!resultResponse.isResult()){
             return  ResponseEntity.ok(resultResponse);
         }
-        return userService.changeProfile(photo, name, email, password, removePhoto, user);
+        return userService.changeProfile(photo, name, email, password,
+                removePhoto?(byte)1:(byte)0, user);
+    }
+
+    @PostMapping("/profile/my")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<ResultResponse> changeProfile(
+            @RequestBody ProfileData profileData, Principal principal) throws IOException {
+
+        User user = commonService.getCurrentUser(principal);
+        Boolean rp = profileData.getRemovePhoto();
+        byte r_p = 0;
+        if (rp != null && rp == true){
+            r_p = (byte) 1;
+        }
+
+        ResultResponse resultResponse = userService.validateChangeProfile(
+                null,//profileData.getPhoto(),
+                profileData.getName(),
+                profileData.getEmail(), profileData.getPassword(),
+                r_p, user);
+        if (!resultResponse.isResult()){
+            return  ResponseEntity.ok(resultResponse);
+        }
+        return userService.changeProfile(null, //profileData.getPhoto(),
+                profileData.getName(),
+                profileData.getEmail(), profileData.getPassword(),
+                r_p, user);
     }
 
     @PutMapping("/settings")

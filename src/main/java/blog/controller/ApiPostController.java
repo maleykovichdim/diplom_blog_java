@@ -5,6 +5,7 @@ import blog.api.request.ModerateRequest;
 import blog.api.request.PostRequest;
 import blog.api.response.ResultResponse;
 import blog.api.response.StatisticResponse;
+import blog.api.response.auth.LoginResponse;
 import blog.api.response.post.PostByIdResponse;
 import blog.api.response.post.PostResponse;
 import blog.model.User;
@@ -101,6 +102,7 @@ public class ApiPostController {
         if (!resultResponse.isResult()){
             return ResponseEntity.ok(resultResponse);
         }
+
         return postService.putPost(inputPost, currentUserId);
     }
 
@@ -118,15 +120,21 @@ public class ApiPostController {
 
 
     @PostMapping("/post/like")
-    @PreAuthorize("hasAuthority('user:write')")
+    //@PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ResultResponse> likePost(@RequestBody LikeRequest like, Principal principal)  {
+        if (principal == null) {
+            return new ResponseEntity<>( HttpStatus.UNAUTHORIZED);
+        }
         int currentUserId = commonService.getCurrentUser(principal).getId();
         return postService.likeOrDislikePost(like, currentUserId, true);
     }
 
     @PostMapping("/post/dislike")
-    @PreAuthorize("hasAuthority('user:write')")
+    //@PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ResultResponse> dislikePost(@RequestBody LikeRequest like, Principal principal)  {
+        if (principal == null) {
+            return new ResponseEntity<>( HttpStatus.UNAUTHORIZED);
+        }
         int currentUserId = commonService.getCurrentUser(principal).getId();
         return postService.likeOrDislikePost(like, currentUserId, false);
     }

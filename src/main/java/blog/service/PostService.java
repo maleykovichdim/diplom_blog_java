@@ -15,12 +15,15 @@ import blog.model.enums.ModerationStatus;
 import blog.model.other.PostsCountPerDate;
 import blog.model.repository.*;
 
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.ObjectUtils;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -253,14 +256,18 @@ public class PostService {
                 moderationStatus = ModerationStatus.ACCEPTED;
                 break;
         }
-        int count = (int)postRepository.countNumPostsModeration(moderationStatus, (byte) 1, userId);
+        int count = (int)postRepository.countNumPostsModeration(moderationStatus, (byte) 1
+          //      , userId
+        );
 
         if (count == 0){
             return ResponseEntity.ok(new PostResponse(0, new ArrayList<>()));
         }
 
         Pageable pageable = PageRequest.of(offset, limit,  Sort.by("time").descending());
-        List<Post> postList = postRepository.findPostsModeration(moderationStatus,(byte)1, userId, pageable);
+        List<Post> postList = postRepository.findPostsModeration(moderationStatus,(byte)1
+                //, userId
+                , pageable);
 
         List<PostResponseBody> postResponseBodyList = convertToResponseManyPosts(postList);
         return ResponseEntity.ok(new PostResponse(count, postResponseBodyList));
@@ -301,20 +308,59 @@ public class PostService {
                 needToAddTags.add(newTag);
             }
         }
-        List<Tag> newNeedToAddTags = (List<Tag>) tagRepository.saveAll(needToAddTags);
+        List<Tag> newNeedToAddTags = new ArrayList<>();
+        if (needToAddTags.size() > 0) {
+            newNeedToAddTags = (List<Tag>) tagRepository.saveAll(needToAddTags);
+        }
         noNeedToAdd.addAll(newNeedToAddTags);
         return noNeedToAdd;
     }
 
     private void processTag2Post(Post currentPost, List<Tag> newTags){
         List<Tag2Post> tag2Posts = new ArrayList<>();
-        for (Tag tag: newTags){
+
+        List<Tag> filteredTags = new ArrayList<>();
+        List<Tag2Post> existed = new ArrayList<>();
+        List<Integer> forErasing = new ArrayList<>();
+
+        List<Tag2Post> curTag2Posts = tag2PostRepository.findTag2PostList(currentPost.getId());
+        for (Tag tag_: newTags){
+            boolean alreadyExists = false;
+            int tagId = tag_.getId();
+            for (Tag2Post tp_: curTag2Posts){
+                if (tp_.getTagId() == tagId){
+                    alreadyExists = true;
+                    existed.add(tp_);
+                    break;
+                }
+            }
+            if (!alreadyExists){
+                filteredTags.add(tag_);
+            }
+        }
+
+        for (Tag tag: filteredTags){
             Tag2Post tag2Post = new Tag2Post();
             tag2Post.setTagId(tag.getId());
             tag2Post.setPostId(currentPost.getId());
             tag2Posts.add(tag2Post);
         }
         tag2PostRepository.saveAll(tag2Posts);
+        for (Tag2Post tp_: curTag2Posts){
+            int id = tp_.getId();
+            boolean isExisted = false;
+            for (Tag2Post etp_: existed){
+                int eid = etp_.getId();
+                if (eid == id){
+                    isExisted = true;
+                    break;
+                }
+            }
+            if (!isExisted){
+                forErasing.add(id);
+            }
+        }
+        tag2PostRepository.cleanTag2Post(forErasing);
     }
 
     public ResultResponse validatePostData(PostRequest inputPost){
@@ -342,7 +388,18 @@ public class PostService {
             resultResponse.setResult(false);
             resultResponse.setErrors(error);
         }
+        //tag validation
+        List<String> tags = inputPost.getTags();
+        ListIterator<String> iterator = tags.listIterator();
+        while (iterator.hasNext()) {
+            String next = iterator.next();
+            iterator.set(next.toUpperCase());
+        }
+        Set<String> targetSet = Sets.newHashSet(tags);
+        tags = new ArrayList<>(targetSet);
+        inputPost.setTags(tags);
         return resultResponse;
+
     }
 
 
@@ -407,10 +464,10 @@ public class PostService {
 
     public ResponseEntity<StatisticResponse> getAllStatistic(){
         StatisticResponse statisticResponse = new StatisticResponse();
-        statisticResponse.setPostsCount((int)postRepository.size());
-        statisticResponse.setLikesCount((int)voteRepository.countAllLikes());
-        statisticResponse.setDislikesCount((int)voteRepository.countAllDisLikes());
-        statisticResponse.setViewsCount((int)postRepository.sumViewCount());
+        statisticResponse.setPostsCount(postRepository.size());
+        statisticResponse.setLikesCount(voteRepository.countAllLikes());
+        statisticResponse.setDislikesCount(voteRepository.countAllDisLikes());
+        statisticResponse.setViewsCount(postRepository.sumViewCount());
         statisticResponse.setFirstPublication(postRepository.earliestTime().toEpochSecond(ZoneOffset.UTC));
         return ResponseEntity.ok(statisticResponse);
     }
@@ -418,11 +475,13 @@ public class PostService {
     public ResponseEntity<StatisticResponse> getAllStatisticOfMine(User user){
         StatisticResponse statisticResponse = new StatisticResponse();
         int id = user.getId();
-        statisticResponse.setPostsCount((int)postRepository.countPostsOfUser(id));//
-        statisticResponse.setLikesCount((int)voteRepository.countAllLikesOfUser(id));
-        statisticResponse.setDislikesCount((int)voteRepository.countAllDislikesOfUser(id));//
-        statisticResponse.setViewsCount((int)postRepository.sumViewCountOfUser(id));
-        statisticResponse.setFirstPublication(postRepository.earliestTimeOfUser(id).toEpochSecond(ZoneOffset.UTC));
+        statisticResponse.setPostsCount(postRepository.countPostsOfUser(id));//
+        statisticResponse.setLikesCount(voteRepository.countAllLikesOfUser(id));
+        statisticResponse.setDislikesCount(voteRepository.countAllDislikesOfUser(id));//
+        statisticResponse.setViewsCount(postRepository.sumViewCountOfUser(id));
+        LocalDateTime time = postRepository.earliestTimeOfUser(id);
+        statisticResponse.setFirstPublication(
+                time == null ? null : time.toEpochSecond(ZoneOffset.UTC));
         return ResponseEntity.ok(statisticResponse);
     }
 
@@ -482,6 +541,7 @@ public class PostService {
         }
 
         postRepository.updateViewCount(id);
+        post.setViewCount(post.getViewCount()+1);
         return Optional.of(postEntityToResponseById(post, id));
     }
 

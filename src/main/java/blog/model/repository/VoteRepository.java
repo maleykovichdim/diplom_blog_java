@@ -27,21 +27,21 @@ public interface VoteRepository extends CrudRepository<PostVote, Integer> {
     @Query("SELECT COUNT(v) FROM PostVote v "+
             "WHERE v.userId=:userId AND v.value=1"
     )
-    long countAllLikesOfUser(@Param("userId") int userId);
+    Long countAllLikesOfUser(@Param("userId") int userId);
 
     @Query("SELECT COUNT(v) FROM PostVote v "+
             "WHERE v.userId=:userId AND v.value=-1"
     )
-    long countAllDislikesOfUser(@Param("userId") int userId);
+    Long countAllDislikesOfUser(@Param("userId") int userId);
 
 
     @Query("SELECT COUNT(v) FROM PostVote v "+
             "WHERE v.value = 1 "
     )
-    long countAllLikes();
+    Long countAllLikes();
 
     @Query("SELECT COUNT(v) FROM PostVote v "+
             "WHERE v.value = -1 "
     )
-    long countAllDisLikes();
+    Long countAllDisLikes();
 }

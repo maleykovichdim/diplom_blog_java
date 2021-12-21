@@ -22,10 +22,10 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Integer
     Optional<Post> findById(Integer integer);
 
     @Query( "SELECT count(*) FROM Post p WHERE p.userId=:userId" )
-    long countPostsOfUser(@Param("userId") int userId);
+    Long countPostsOfUser(@Param("userId") int userId);
 
     @Query( "SELECT SUM(p.viewCount) FROM Post p WHERE p.userId=:userId" )
-    long sumViewCountOfUser(@Param("userId") int userId);
+    Long sumViewCountOfUser(@Param("userId") int userId);
 
     @Query( "SELECT MIN(p.time) FROM Post p WHERE p.userId=:userId" )
     LocalDateTime earliestTimeOfUser(@Param("userId") int userId);
@@ -34,10 +34,10 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Integer
     List<Post> findAllCustom(Pageable pageable);
 
     @Query( "SELECT COUNT(p) FROM Post p" )
-    long size();
+    Long size();
 
     @Query( "SELECT SUM(p.viewCount) FROM Post p" )
-    long sumViewCount();
+    Long sumViewCount();
 
     @Query( "SELECT MIN(p.time) FROM Post p" )
     LocalDateTime earliestTime();
@@ -215,24 +215,26 @@ public interface PostRepository extends PagingAndSortingRepository<Post, Integer
     );
 
     @Query("SELECT COUNT(p) FROM Post p "+
-            "WHERE p.moderatorId = :userId and "+
+            "WHERE "+
+            //"p.moderatorId = :userId and "+
             "p.moderationStatus = :moderationStatus and "+
             "p.isActive = :isActive "
     )
     long countNumPostsModeration(    @Param("moderationStatus") ModerationStatus moderationStatus,
-                                                 @Param("isActive") Byte isActive,
-                                                 @Param("userId") int userId
+                                                 @Param("isActive") Byte isActive
+                                                 //,@Param("userId") int userId
 
     );
 
     @Query("SELECT p FROM Post p "+
-            "WHERE p.moderatorId = :userId and "+
+            "WHERE "+
+            //"p.moderatorId = :userId and "+
             "p.moderationStatus = :moderationStatus and "+
             "p.isActive = :isActive "
     )
     List<Post> findPostsModeration(  @Param("moderationStatus") ModerationStatus moderationStatus,
                                                  @Param("isActive") Byte isActive,
-                                                 @Param("userId") int userId,
+                                                 //@Param("userId") int userId,
                                                  Pageable pageable
 
     );
