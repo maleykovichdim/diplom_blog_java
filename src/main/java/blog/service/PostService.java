@@ -16,14 +16,12 @@ import blog.model.other.PostsCountPerDate;
 import blog.model.repository.*;
 
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.ObjectUtils;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -285,7 +283,7 @@ public class PostService {
         if (needToDoExtraOperation) {
             post.setUserId(userId);
             post.setModerationStatus(ModerationStatus.NEW);
-            post.setIsActive((byte)1);//Todo check it
+            post.setIsActive((byte)1);
         }
         return post;
     }

@@ -18,7 +18,6 @@ import blog.service.CommonService;
 import blog.service.PostService;
 import blog.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +27,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -117,6 +115,7 @@ public class ApiAuthController {
 
         UserLoginResponse userLoginResponse = new UserLoginResponse();
         userLoginResponse.setEmail(currentUser.getEmail());
+        userLoginResponse.setPhoto(currentUser.getPhoto());
         userLoginResponse.setName(currentUser.getName());
         boolean isModerator = (currentUser.getIsModerator() == 1);
         userLoginResponse.setModeration(isModerator);

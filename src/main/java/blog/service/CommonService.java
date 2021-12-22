@@ -1,29 +1,18 @@
 package blog.service;
 
-import blog.api.response.auth.CaptchaResponse;
-import blog.model.CaptchaCode;
 import blog.model.User;
 import blog.model.repository.CaptchaRepository;
 import blog.model.repository.UserRepository;
 import com.github.cage.Cage;
 import com.github.cage.YCage;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.imageio.ImageIO;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Base64;
 import java.util.Properties;
 
 
@@ -56,7 +45,6 @@ public class CommonService {
 
     public boolean sendChangePasswordEmail(String email, String hash){
 
-        //TODO: What is better? Why?
         Properties prop = new Properties();
         prop.put("mail.smtp.host", "smtp.gmail.com");
         prop.put("mail.smtp.port", "587");

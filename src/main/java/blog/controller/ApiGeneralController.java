@@ -103,23 +103,23 @@ public class ApiGeneralController {
 
         User user = commonService.getCurrentUser(principal);
         Boolean rp = profileData.getRemovePhoto();
-        byte r_p = 0;
-        if (rp != null && rp == true){
-            r_p = (byte) 1;
+        byte removePhoto = 0;
+        if (rp != null && rp){
+            removePhoto = (byte) 1;
         }
 
         ResultResponse resultResponse = userService.validateChangeProfile(
                 null,//profileData.getPhoto(),
                 profileData.getName(),
                 profileData.getEmail(), profileData.getPassword(),
-                r_p, user);
+                removePhoto, user);
         if (!resultResponse.isResult()){
             return  ResponseEntity.ok(resultResponse);
         }
         return userService.changeProfile(null, //profileData.getPhoto(),
                 profileData.getName(),
                 profileData.getEmail(), profileData.getPassword(),
-                r_p, user);
+                removePhoto, user);
     }
 
     @PutMapping("/settings")
